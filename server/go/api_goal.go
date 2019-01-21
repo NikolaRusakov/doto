@@ -13,7 +13,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/jmcvetta/neoism"
-	"github.com/rusakov/doto/server/neover/neo"
+	"github.com/rusakov/doto/server/neo"
 	"net/http"
 	"net/url"
 	"path"
