@@ -1,0 +1,175 @@
+swagger: '2.0'
+info:
+  version: 1.0.0
+  title: Do-to
+host: ''
+basePath: /api
+schemes:
+  - http
+paths:
+  /goals/{section}:
+    get:
+      tags: ['Goal']
+      summary: 'goal by single section selected'
+      description: ''
+      operationId: 'goals-section'
+      produces:
+      - application/json
+      parameters:
+        - in: path
+          name: section
+          required: true
+          schema:
+            type: array
+            enum: Sections
+              - productivity
+              - todo
+              - enhancement
+              - proficiency
+
+            # schema:
+                # oneOf:
+                # - $ref: '#/definitions/Goal_sections'
+            # items:
+              # schema:
+              #   oneOf:
+              #   - $ref: '#/definitions/Goal_sections'
+              # type: string
+              #   enum: [asc, desc]
+              # oneOf: [a]
+            # schema:
+            # $ref: '#/definitions/Goal_sections'
+      # parameters:
+      #   - in: path
+      #     name: section   # Note the name is the same as in the path
+      #     required: true
+      #     schema:
+      #       $ref: '#/definitions/Goal_sections'
+      #     description: section enum
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            $ref: '#/definitions/Goal'
+
+  /goals:
+    get:
+      tags: ['Goal']
+      summary: 'multiple goals by section'
+      description: ''
+      operationId: 'goals-section-query'
+      produces:
+      - application/json
+      parameters:
+        # - in: query
+        #   name: color
+        #   type: array
+        #   collectionFormat: csv
+        #   items:
+        #     type: string
+        - in: query
+          name: sections
+          required: true
+          collectionFormat: csv
+          schema:
+            type: array
+            enum: &Sections
+              - productivity
+              - todo
+              - enhancement
+              - proficiency
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            $ref: '#/definitions/Goal'
+
+  /goal/{section}:
+    post:
+      # tags:
+      # - Post
+      tags: ["Goal"]
+      summary: post goal
+      description: Adds goal
+      operationId: goal-post
+      produces:
+      - application/json
+      parameters:
+        - in: path
+          name: section
+          required: true
+          schema:
+            type: array
+            enum: Sections
+              - productivity
+              - todo
+              - enhancement
+              - proficiency
+
+        # - in: path
+        #   name: section
+        #   type: array
+        #   items:
+        #     enum:
+        #       - productivity
+        #       - todo
+        #       - enhancement
+        #       - proficiency
+        #   required: true
+        - in: body
+          name: content
+          schema:
+            $ref: '#/definitions/Goal'
+          required: true
+      responses:
+        '200':
+          description: Successful operation
+          schema:
+            type: array
+            $ref: '#/definitions/Goal'
+
+definitions:
+ Goal:
+    properties:
+      name:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+        format: int64
+      timestamp:
+        type: string
+      section:
+        $ref: '#/definitions/Goal_sections'
+      tasks:
+        $ref: '#/definitions/Task'
+ Task:
+    properties:
+      id:
+        type: integer
+        format: int64
+      section:
+        $ref: '#/definitions/Goal_sections'
+      name:
+        type: string
+      description:
+        type: string
+      timestamp:
+        type: string
+        format: full-date
+      estimation:
+        type: string
+        format: full-date
+      subtask:
+        $ref: '#/definitions/Task'
+
+ Goal_sections:
+    type: string
+    enum: Sections
+      - productivity
+      - todo
+      - enhancement
+      - proficiency
