@@ -1,0 +1,95 @@
+type Query {
+    goalById(id: ID!): Goal
+    goalsFromSection(section: Section!): [Goal]
+    goalsInBatch(arg: SearchArgs!): [Goal]
+    taskDetailsFromGoal(task: InputTask!): Task
+}
+# The mutation type, represents all updates we can make to our data
+type Mutation {
+    createGoal(inputGoal: InputGoal!): Goal
+    createTask(inputTask: InputTask!): Task
+    updateGoal(inputGoal: InputGoal!): Goal
+    updateTask(inputTask: InputTask!): Task
+}
+
+input InputGoal {
+    id: ID
+    section: Section!
+    name: String!
+    description: String!
+    estimation: Float
+    isActive: Boolean
+    timestamp: Date
+    tasks: [InputTask]
+    connectionWith: [InputGoalDefinitions]
+}
+
+input InputTask {
+    id: ID
+    section: Section!
+    name: String!
+    description: String!
+    estimation: Float
+    isActive: Boolean
+    timestamp: Date
+    subTasks: [InputTask]
+    connectionWith: [InputGoalDefinitions]
+}
+
+input InputGoalDefinitions{
+    name: String
+    id: ID
+}
+
+#union TaskOrGoalInput = InputTask | InputGoal
+
+input SearchArgs {
+    cursor: ID!
+    count: Int!
+}
+
+interface BaseTask{
+    id: ID
+    section: Section!
+    name: String!
+    description: String!
+    estimation: Float
+    isActive: Boolean
+    timestamp: Date
+}
+
+type Goal implements BaseTask{
+    tasks: [Task]
+    connectionWith: [Goal]
+    id: ID
+    section: Section!
+    name: String!
+    description: String!
+    estimation: Float
+    isActive: Boolean
+    timestamp: Date
+}
+
+type Task implements BaseTask{
+    parent: TaskOrGoal
+    subTasks: [Task]
+    connectionWith: [Goal]
+    id: ID
+    section: Section!
+    name: String!
+    description: String!
+    estimation: Float
+    isActive: Boolean
+    timestamp: Date
+}
+
+union TaskOrGoal = Task | Goal
+
+enum Section{
+    PRODUCTIVITY
+    EFFICIENCY
+    TODO
+    IMPROVEMENT
+}
+
+scalar Date
