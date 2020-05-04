@@ -16,7 +16,7 @@ import { Task } from './task';
 export interface Goal { 
     name?: string;
     description?: string;
-    id?: number;
+    id?: string;
     timestamp?: string;
     section?: GoalSections;
     tasks?: Task;

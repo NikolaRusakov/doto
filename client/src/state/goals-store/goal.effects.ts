@@ -16,8 +16,8 @@ export class GoalEffects {
       GoalActionTypes.LOAD_GOALS
     ),
     mergeMap(action =>
-      this.goalService.goalsSection(action.payload.section).pipe(
-        map(data => ({type: GoalActionTypes.LOAD_GOALS_SUCCESS, payload: data})),
+      this.goalService.goalsSection(action.payload.section, 'response').pipe(
+        map(data => ({type: GoalActionTypes.LOAD_GOALS_SUCCESS, payload: data.body})),
         catchError(() => of({type: GoalActionTypes.LOAD_GOALS_FAILURE}))
       )
     )

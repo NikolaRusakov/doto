@@ -8,14 +8,15 @@
  */
 
 package swagger
-//import GoalSections "./model_goal_sections.go"
+
+
 type Goal struct {
 
 	Name string `json:"name,omitempty"`
 
 	Description string `json:"description,omitempty"`
 
-	Id int64 `json:"id,omitempty"`
+	Id string`json:"id,omitempty"`
 
 	Timestamp string `json:"timestamp,omitempty"`
 

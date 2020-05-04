@@ -27,10 +27,10 @@ import {Configuration} from '../configuration';
 import {Observable} from 'rxjs/internal/Observable';
 
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class GoalService {
 
-  protected basePath = 'https://localhost/api';
+  protected basePath = 'http://localhost:3000/api';
   public defaultHeaders = new HttpHeaders();
   public configuration = new Configuration();
 
@@ -122,6 +122,7 @@ export class GoalService {
   public goalsSection(section: GoalSections, observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<Goal>>;
   public goalsSection(section: GoalSections, observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<Goal>>;
   public goalsSection(section: GoalSections, observe: any = 'body', reportProgress: boolean = false): Observable<any> {
+    console.log(section);
 
     if (section === null || section === undefined) {
       throw new Error('Required parameter section was null or undefined when calling goalsSection.');

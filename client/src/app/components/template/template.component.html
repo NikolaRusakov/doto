@@ -1,7 +1,3 @@
-
-<dt-main-nav>
-
+<dt-main-nav (getGoals)="loadGoals($event)" [goals]="goals$">
+  <dt-main-dashboard></dt-main-dashboard>
 </dt-main-nav>
-<dt-main-dashboard>
-
-</dt-main-dashboard>

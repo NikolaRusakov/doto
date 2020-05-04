@@ -19,14 +19,16 @@ import {LayoutModule} from '@angular/cdk/layout';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {TemplateModule} from './components/template/template.module';
 import {FlexLayoutModule} from '@angular/flex-layout';
-import {CustomShowHideDirective, CustomBreakPointsProvider, PRINT_BREAKPOINTS} from './utils/custom-breakpoints';
 import {CUSTOM_HEIGHT_BREAKPOINTS} from './components/test/breakpoints';
 import {CustomLayoutDirective} from './components/test/flex-width.directive';
 import {CustomFlexOverrideDirective} from './components/test/flex-override.directive';
-import { StoreModule } from '@ngrx/store';
-import { reducers, metaReducers } from './reducers';
-import { EffectsModule } from '@ngrx/effects';
-import { AppEffects } from './app.effects';
+import {StoreModule} from '@ngrx/store';
+import {reducers, metaReducers} from '../state/goals-store/reducers';
+import {EffectsModule} from '@ngrx/effects';
+import {environment} from '../environments/environment';
+import {StoreDevtoolsModule} from '@ngrx/store-devtools';
+import {GoalEffects} from '../state/goals-store/goal.effects';
+import {HttpClientModule} from '@angular/common/http';
 
 @NgModule({
   declarations: [
@@ -41,6 +43,7 @@ import { AppEffects } from './app.effects';
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
+    HttpClientModule,
     AppRoutingModule,
     MatGridListModule,
     MatCardModule,
@@ -55,8 +58,10 @@ import { AppEffects } from './app.effects';
     TemplateModule,
     /*FlexLayoutModule.withConfig({disableDefaultBps: true}, PRINT_BREAKPOINTS),*/
     FlexLayoutModule.withConfig({}, CUSTOM_HEIGHT_BREAKPOINTS),
-    StoreModule.forRoot(reducers, { metaReducers }),
-    EffectsModule.forRoot([AppEffects])
+    StoreModule.forRoot(reducers, {metaReducers}),
+    !environment.production && StoreDevtoolsModule.instrument(),
+    EffectsModule.forRoot([GoalEffects]),
+    StoreDevtoolsModule.instrument({maxAge: 25, logOnly: environment.production})
   ],
   providers: [
     // CustomBreakPointsProvider

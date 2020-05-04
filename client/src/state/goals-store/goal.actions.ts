@@ -16,14 +16,14 @@ export enum GoalActionTypes {
 export class LoadGoals implements Action {
   readonly type = GoalActionTypes.LOAD_GOALS;
 
-  constructor(public payload: { section: GoalSections }) {
+  constructor(public payload: { section: GoalSections | null }) {
   }
 }
 
 export class LoadGoalsSuccess implements Action {
   readonly type = GoalActionTypes.LOAD_GOALS_SUCCESS;
 
-  constructor(public payload: { data: Goal[] }) {
+  constructor(public payload: Goal[]) {
   }
 }
 

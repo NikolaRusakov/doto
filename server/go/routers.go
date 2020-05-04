@@ -11,10 +11,9 @@ package swagger
 
 import (
 	"fmt"
-	"net/http"
-	"strings"
-
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
+	"net/http"
 )
 
 type Route struct {
@@ -28,6 +27,11 @@ type Routes []Route
 
 func NewRouter() *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
+
+	// cors.Default() setup the middleware with default options being
+	// all origins accepted with simple methods (GET, POST). See
+	// documentation below for more options.
+	cors.Default().Handler(router)
 	for _, route := range routes {
 		var handler http.Handler
 		handler = route.HandlerFunc
@@ -48,7 +52,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 }
 
 var routes = Routes{
-	Route{
+	/*Route{
 		"Index",
 		"GET",
 		"/api/",
@@ -73,6 +77,6 @@ var routes = Routes{
 		"GoalsSectionQuery",
 		strings.ToUpper("Get"),
 		"/api/goals",
-		GoalsSectionQuery,
-	},
+		GoalsQuery,
+	},*/
 }

@@ -12,7 +12,12 @@ package swagger
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/go-openapi/runtime/middleware"
+	"github.com/google/uuid"
 	"github.com/jmcvetta/neoism"
+	"github.com/mitchellh/mapstructure"
+	"github.com/rusakov/doto/server/api/models"
+	"github.com/rusakov/doto/server/api/restapi/operations/goal"
 	"github.com/rusakov/doto/server/neo"
 	"net/http"
 	"net/url"
@@ -22,7 +27,7 @@ import (
 
 func GoalPost(w http.ResponseWriter, r *http.Request) {
 	goal := Goal{}
-
+	goal.Id = uuid.New().String()
 	section, _ := url.Parse(r.URL.Path)
 	ps := path.Base(section.Path)
 	println(ps)
@@ -35,6 +40,7 @@ func GoalPost(w http.ResponseWriter, r *http.Request) {
 
 	var inode map[string]interface{}
 	unmarsh, _ := json.Marshal(goal)
+
 	er := json.Unmarshal(unmarsh, &inode)
 	if er != nil {
 		http.Error(w, e.Error(), 500)
@@ -63,6 +69,8 @@ func GoalPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func GoalsSection(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	u, _ := url.Parse(r.URL.Path)
 	queryPar := path.Base(u.Path)
 
@@ -77,18 +85,68 @@ func GoalsSection(w http.ResponseWriter, r *http.Request) {
 	}
 	err := neo.Db.Cypher(&cq1)
 
-	output, err := json.Marshal(res0)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 		return
 	}
-
+	goals := make([]Goal, len(res0))
+	for k, v := range res0 {
+		println(v.N.Data)
+		var g Goal
+		err := mapstructure.Decode(v.N.Data, &g)
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+		goals[k] = g
+	}
+	println(goals)
+	conv, _ := json.Marshal(goals)
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("content-type", "application/json")
-	w.Write(output)
+	w.Write(conv)
 }
 
-func GoalsSectionQuery(w http.ResponseWriter, r *http.Request) {
+func GoalsSec(params goal.GoalsSectionParams) middleware.Responder {
+	s := params.Section
+	println(s)
+	res0 := []struct {
+		N neoism.Node // Column "n" gets automagically unmarshalled into field N
+	}{}
+
+	//s := strings.Split(sections[0], ",")
+	println("multi")
+	for i, v := range s {
+		println(i, v)
+	}
+	cq1 := neoism.CypherQuery{
+		Statement:  `MATCH (n:GOAL) WHERE n.section IN {sections} RETURN n`,
+		Parameters: neoism.Props{"sections": &s},
+		Result:     &res0,
+	}
+	err := neo.Db.Cypher(&cq1)
+
+	//output, err := json.Marshal(res0)
+	if err != nil {
+		//http.Error(w, err.Error(), 500)
+		//return
+	}
+	goals := make([]*models.Goal, len(res0))
+	for k, v := range res0 {
+		println(v.N.Data)
+		var g *models.Goal
+		err := mapstructure.Decode(v.N.Data, &g)
+		if err != nil {
+			//http.Error(w, err.Error(), 500)
+			//return
+		}
+		goals[k] = g
+	}
+
+	//conv, _ := json.Marshal(goals)
+	return goal.NewGoalsSectionOK().WithPayload(goals)
+}
+func GoalsQuery(w http.ResponseWriter, r *http.Request) {
 	sections := r.URL.Query()["sections"]
 
 	res0 := []struct {
@@ -133,4 +191,76 @@ func GoalsSectionQuery(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
+}
+func GoalsSectionQuery(params goal.GoalsSectionParams) middleware.Responder {
+	//w.Header().Set("Access-Control-Allow-Origin", "*")
+	//w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	var responder middleware.Responder
+	//sections := r.URL.Query()["sections"]
+	sections := params.Section
+	res0 := []struct {
+		N neoism.Node // unmarshalled into field N
+	}{}
+	println("s")
+	if sections != nil {
+		s := strings.Split(sections[0], ",")
+		println("multi")
+		for i, v := range s {
+			println(i, v)
+		}
+		cq1 := neoism.CypherQuery{
+			Statement:  `MATCH (n:GOAL) WHERE n.section IN {sections} RETURN n`,
+			Parameters: neoism.Props{"sections": &s},
+			Result:     &res0,
+		}
+		err := neo.Db.Cypher(&cq1)
+
+		//output, err := json.Marshal(res0)
+		if err != nil {
+			//http.Error(w, err.Error(), 500)
+			//return
+		}
+		goals := make([]*models.Goal, len(res0))
+		for k, v := range res0 {
+			var g *models.Goal
+			err := mapstructure.Decode(v.N.Data, &g)
+			if err != nil {
+				//http.Error(w, err.Error(), 500)
+				//return
+			}
+			goals[k] = g
+		}
+
+		//conv, _ := json.Marshal(goals)
+		responder = goal.NewGoalsSectionOK().WithPayload(goals)
+		//w.Write(output)
+	} else {
+		cq1 := neoism.CypherQuery{
+			Statement: `MATCH (n:GOAL) RETURN n`,
+			Result:    &res0,
+		}
+		err := neo.Db.Cypher(&cq1)
+		if err != nil {
+			//http.Error(w, err.Error(), 500)
+			//return
+		}
+
+		goals := make([]*models.Goal, len(res0))
+		for k, v := range res0 {
+			var g *models.Goal
+			err := mapstructure.Decode(v.N.Data, &g)
+			if err != nil {
+				//http.Error(w, err.Error(), 500)
+				//return
+			}
+			goals[k] = g
+		}
+
+		//conv, _ := json.Marshal(goals)
+		responder = goal.NewGoalsSectionOK().WithPayload(goals)
+		//w.Write(conv)
+	}
+	return responder
+	//w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	//w.WriteHeader(http.StatusOK)
 }
