@@ -1,0 +1,40 @@
+type Query {
+    goalById(id: ID!): Goal
+    goalsFromSection(section: Section!): [Goal]
+}
+# The mutation type, represents all updates we can make to our data
+type Mutation {
+    createReview(episode: Episode!, review: ReviewInput!): Review
+}
+
+interface BaseTask{
+    id: ID!
+    section: Section!
+    name: String!
+    description: String!
+    estimation: Float
+    isActive: Boolean!
+    timestamp: Date!
+}
+
+type Goal implements BaseTask{
+    tasks: [Task]
+    connectionWith: [Goal]
+}
+
+type Task implements BaseTask{
+    parent: TaskOrGoal
+    subTasks: [Task]
+    connectionWith: [Goal]
+}
+
+union TaskOrGoal = Task | Goal
+
+enum Section{
+    PRODUCTIVITY
+    EFFICIENCY
+    TODO
+    IMPROVEMENT
+}
+
+scalar Date
